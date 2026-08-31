@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parenthèse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14121f;
+    --plum:#2a2140;
+    --plum-light:#463a63;
+    --gold:#c9a66b;
+    --gold-soft:#e3c99a;
+    --blush:#e8b4bc;
+    --cream:#f6efe4;
+    --err:#d98a7a;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    min-height:100%;
+    background: radial-gradient(ellipse at 50% 20%, var(--plum-light) 0%, var(--plum) 45%, var(--ink) 100%);
+    font-family:'Jost', sans-serif;
+    color:var(--cream);
+  }
+
+  body{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:32px 20px;
+  }
+
+  /* eclipse corona, fixed, subtle */
+  .corona{
+    position:fixed;
+    top:-140px;
+    left:50%;
+    transform:translateX(-50%);
+    width:340px;
+    height:340px;
+    border-radius:50%;
+    background: radial-gradient(circle, var(--ink) 0%, var(--ink) 38%, var(--gold-soft) 40%, var(--gold) 46%, transparent 72%);
+    opacity:0.55;
+    pointer-events:none;
+    filter: blur(1px);
+  }
+
+  .stars{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 15% 25%, rgba(246,239,228,0.5), transparent),
+      radial-gradient(1px 1px at 80% 15%, rgba(246,239,228,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 65% 70%, rgba(246,239,228,0.35), transparent),
+      radial-gradient(1px 1px at 30% 80%, rgba(246,239,228,0.4), transparent),
+      radial-gradient(1px 1px at 90% 60%, rgba(246,239,228,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 45% 10%, rgba(246,239,228,0.4), transparent);
+  }
+
+  .scene{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:480px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:34px;
+  }
+
+  .scene.active{
+    display:flex;
+    animation: rise 900ms cubic-bezier(.19,1,.22,1) both;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(18px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .eyebrow{
+    font-family:'Jost', sans-serif;
+    font-size:13px;
+    letter-spacing:0.14em;
+    color:var(--gold-soft);
+    font-weight:400;
+  }
+
+  h1, .quote{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:500;
+    line-height:1.28;
+  }
+
+  #scene-intro h1{
+    font-size:clamp(26px, 6vw, 34px);
+    letter-spacing:0.01em;
+  }
+
+  .btn{
+    font-family:'Jost', sans-serif;
+    font-size:14px;
+    letter-spacing:0.06em;
+    color:var(--ink);
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+    border:none;
+    padding:15px 38px;
+    border-radius:999px;
+    cursor:pointer;
+    transition: transform 220ms ease, box-shadow 220ms ease;
+    box-shadow: 0 8px 24px rgba(201,166,107,0.18);
+  }
+
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow: 0 12px 30px rgba(201,166,107,0.28);
+  }
+
+  .btn:active{ transform:translateY(0); }
+
+  .btn-ghost{
+    background:transparent;
+    border:1px solid rgba(246,239,228,0.35);
+    color:var(--cream);
+    box-shadow:none;
+  }
+
+  .btn-ghost:hover{
+    border-color:var(--gold-soft);
+    box-shadow:none;
+  }
+
+  /* password scene */
+  #scene-pass .lock{
+    width:34px;
+    height:34px;
+    opacity:0.75;
+  }
+
+  .pass-form{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+    width:100%;
+  }
+
+  #pass-input{
+    width:100%;
+    max-width:280px;
+    text-align:center;
+    background:rgba(246,239,228,0.06);
+    border:1px solid rgba(246,239,228,0.28);
+    border-radius:14px;
+    padding:15px 18px;
+    color:var(--cream);
+    font-family:'Jost', sans-serif;
+    font-size:15px;
+    letter-spacing:0.08em;
+    outline:none;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  #pass-input:focus{
+    border-color:var(--gold-soft);
+    background:rgba(246,239,228,0.1);
+  }
+
+  #pass-input.shake{
+    animation: shake 420ms ease;
+    border-color:var(--err);
+  }
+
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-8px); }
+    40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-5px); }
+    80%{ transform:translateX(4px); }
+  }
+
+  .hint{
+    font-size:13px;
+    color:rgba(246,239,228,0.5);
+    font-weight:300;
+  }
+
+  .error-msg{
+    font-size:13px;
+    color:var(--err);
+    min-height:16px;
+    font-weight:300;
+  }
+
+  /* photo scenes */
+  .photo-frame{
+    width:100%;
+    max-width:300px;
+    max-height:42vh;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    border:1px solid rgba(201,166,107,0.25);
+    position:relative;
+    background:rgba(0,0,0,0.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .photo-frame img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+
+  .quote{
+    font-size:clamp(18px, 4.6vw, 22px);
+    font-style:italic;
+    max-width:400px;
+    color:var(--cream);
+  }
+
+  .progress{
+    display:flex;
+    gap:7px;
+  }
+
+  .progress span{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:rgba(246,239,228,0.25);
+    transition: background 300ms ease;
+  }
+
+  .progress span.filled{ background:var(--gold-soft); }
+
+  /* final scene */
+  #scene-final{
+    gap:20px;
+  }
+
+  #scene-final h1{
+    font-size:clamp(34px, 9vw, 52px);
+    letter-spacing:0.01em;
+  }
+
+  #scene-final .sub{
+    font-family:'Jost', sans-serif;
+    font-size:14px;
+    color:rgba(246,239,228,0.55);
+    font-weight:300;
+    letter-spacing:0.02em;
+  }
+
+  @media (max-width: 400px){
+    .scene{ gap:26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="corona"></div>
+<div class="stars"></div>
+
+<!-- SCENE 1 : INTRO -->
+<section class="scene active" id="scene-intro">
+  <span class="eyebrow">Aissa Yaffa</span>
+  <h1>On m'a dit que tu t'en foutais de ma vie.<br>Mais je vois que c'est pas le cas,<br>vu que t'as cliqué sur le lien.</h1>
+  <button class="btn" onclick="goTo('scene-pass')">Cliques ici pour voir la suite</button>
+</section>
+
+<!-- SCENE 2 : PASSWORD -->
+<section class="scene" id="scene-pass">
+  <svg class="lock" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="10" width="14" height="10" rx="2" stroke="#e3c99a" stroke-width="1.3"/>
+    <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#e3c99a" stroke-width="1.3"/>
+  </svg>
+  <h1 style="font-size:22px;">Il faut un mot de passe pour continuer</h1>
+  <form class="pass-form" onsubmit="return checkPassword(event)">
+    <input type="text" id="pass-input" placeholder="Mot de passe" autocomplete="off">
+    <div class="error-msg" id="pass-error"></div>
+    <button class="btn" type="submit">Continuer</button>
+  </form>
+  <p class="hint">Demande le mot de passe à Ibra pour voir la suite</p>
+  <p>Seul Ibra a le mot de passe, tu devras lui demander</p>
+</section>
+
+<!-- SCENE 3 : PHOTO 1 -->
+<section class="scene" id="scene-1">
+  <div class="photo-frame"><img src="citation1.jpg" alt=""></div>
+  <p class="quote">Il paraît que j'ai des sentiments pour toi. Dire non serait presque une insulte, tu es une femme magnifique. J'aurais préféré que tu voies mon comportement comme une prévention pour ton bien : oui, l'envie, le désir, la tension ont existé, mais ce n'est pas toujours la bonne chose à faire.</p>
+  <div class="progress"><span class="filled"></span><span></span><span></span></div>
+  <button class="btn btn-ghost" onclick="goTo('scene-2')">Suivant</button>
+</section>
+
+<!-- SCENE 4 : PHOTO 2 -->
+<section class="scene" id="scene-2">
+  <div class="photo-frame"><img src="citation2.png" alt=""></div>
+  <p class="quote">Parfois fermer une parenthèse est nécessaire avant qu'on fasse une bêtise qu'on regrette. À court terme on peut prendre du plaisir, à long terme on regrette.</p>
+  <div class="progress"><span class="filled"></span><span class="filled"></span><span></span></div>
+  <button class="btn btn-ghost" onclick="goTo('scene-3')">Suivant</button>
+</section>
+
+<!-- SCENE 5 : PHOTO 3 -->
+<section class="scene" id="scene-3">
+  <div class="photo-frame"><img src="citation3.jpg" alt=""></div>
+  <p class="quote">Pourquoi tout gâcher pour une nuit ? Je préfère te garder dans ma vie encore longtemps, surtout qu'on a une séance de sport à faire un documentaire et une éclipse à regarder.</p>
+  <div class="progress"><span class="filled"></span><span class="filled"></span><span class="filled"></span></div>
+  <button class="btn btn-ghost" onclick="goTo('scene-final')">Suivant</button>
+</section>
+
+<!-- SCENE 6 : FINAL -->
+<section class="scene" id="scene-final">
+  <div class="photo-frame" style="max-width:280px;"><img src="viecourte.jpg" alt=""></div>
+  <h1>La vie est courte.</h1>
+  <p class="sub">Profitons en tant que c'est possible</p>
+</section>
+
+<script>
+  const PASSWORD = "elibra";
+
+  function goTo(id){
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function checkPassword(e){
+    e.preventDefault();
+    const input = document.getElementById('pass-input');
+    const error = document.getElementById('pass-error');
+    if(input.value.trim().toLowerCase() === PASSWORD){
+      error.textContent = "";
+      goTo('scene-1');
+    } else {
+      error.textContent = "Ce n'est pas le bon mot de passe.";
+      input.classList.remove('shake');
+      void input.offsetWidth;
+      input.classList.add('shake');
+    }
+    return false;
+  }
+</script>
+
+</body>
+</html>
